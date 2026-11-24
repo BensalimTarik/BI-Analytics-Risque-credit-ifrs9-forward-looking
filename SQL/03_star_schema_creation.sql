@@ -1,0 +1,1 @@
+CREATE SCHEMA IF NOT EXISTS IFRS_9_credit_risk;
