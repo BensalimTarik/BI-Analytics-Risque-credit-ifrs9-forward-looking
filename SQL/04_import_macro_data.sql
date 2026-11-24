@@ -1,3 +1,15 @@
+-- ============================================================================
+-- PROJET      : BI Analytics – Risque de Crédit IFRS 9 (Forward-Looking)
+-- SCRIPT      : 04_import_macro_data.sql
+-- DESCRIPTION : Préparation des indicateurs macroéconomiques FRED, gestion des 
+--               valeurs manquantes du PIB (Forward-Fill) et lissage des séries 
+--               temporelles pour la dimension dim_macro.
+-- ============================================================================
+
+
+-- ============================================================================
+-- 1. PRÉPARATION ET STABILISATION INITIALE DES SÉRIES MACRO (DIM_MACRO_V0)
+-- ============================================================================
 CREATE OR REPLACE TABLE IFRS_9_credit_risk.dim_macro_v0 AS
 
 WITH base AS (
@@ -13,10 +25,9 @@ WITH base AS (
 filled AS (
     SELECT
         *,
-        
-        -- =========================
-        -- FILL NULL GDP (stabilisation série)
-        -- =========================
+        -- --------------------------------------------------------------------
+        -- 1.1 Imputation initiale des valeurs nulles du PIB (valeur précédente)
+        -- --------------------------------------------------------------------
         COALESCE(gdp, LAG(gdp) OVER (ORDER BY macro_date)) AS gdp_filled
     FROM base
 )
@@ -27,11 +38,12 @@ SELECT
     cpi_index,
     interest_rate_pct,
     gdp_filled AS gdp
-
 FROM filled;
 
--- Mise à jour pour dim_macro finale
 
+-- ============================================================================
+-- 2. CONSTRUCTION DE LA DIMENSION MACROÉCONOMIQUE FINALE (DIM_MACRO)
+-- ============================================================================
 CREATE OR REPLACE TABLE IFRS_9_credit_risk.dim_macro AS
 
 WITH ordered AS (
@@ -47,10 +59,9 @@ WITH ordered AS (
 filled_gdp AS (
     SELECT
         *,
-        
-        -- =====================================
-        -- FORWARD FILL GDP (standard banking)
-        -- =====================================
+        -- --------------------------------------------------------------------
+        -- 2.1 Propagation avant (Forward-Fill) du PIB trimestriel (standard bancaire)
+        -- --------------------------------------------------------------------
         COALESCE(
             gdp,
             LAST_VALUE(gdp, true) OVER (
@@ -68,12 +79,12 @@ final AS (
         cpi_index,
         interest_rate_pct,
 
-        -- cleaned GDP
+        -- PIB nettoyé et aligné mensuellement
         gdp_filled AS gdp,
 
-        -- =====================================
-        -- optional: GDP smoothing (rolling mean)
-        -- =====================================
+        -- --------------------------------------------------------------------
+        -- 2.2 Lissage du PIB via moyenne mobile sur 2 mois
+        -- --------------------------------------------------------------------
         AVG(gdp_filled) OVER (
             ORDER BY macro_date
             ROWS BETWEEN 1 PRECEDING AND CURRENT ROW
@@ -84,5 +95,3 @@ final AS (
 
 SELECT *
 FROM final;
-
-
