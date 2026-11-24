@@ -1,208 +1,236 @@
--- Create table Loan
+-- ============================================================================
+-- PROJET      : BI Analytics – Risque de Crédit IFRS 9 (Forward-Looking)
+-- SCRIPT      : 01_data_import.sql
+-- DESCRIPTION : Création de la table de staging brute (Bronze), ingestion du 
+--               fichier CSV depuis le volume Databricks et conversion vers les 
+--               types de données cibles (Silver - loan_v0 & loan_vs).
+-- ============================================================================
 
+
+-- ============================================================================
+-- 1. CRÉATION DE LA TABLE DE STAGING BRUTE (COUCHE BRONZE)
+-- ============================================================================
 CREATE OR REPLACE TABLE IFRS_9_credit_risk.Loan (
--- =========================
--- IDENTIFIANTS
--- =========================
-id STRING,
-member_id STRING,
--- =========================
--- MONTANTS PRÊT
--- =========================
-loan_amnt STRING,
-funded_amnt STRING,
-funded_amnt_inv STRING,
--- =========================
--- INFORMATIONS PRÊT
--- =========================
-term STRING,
-int_rate STRING,
-installment STRING,
-grade STRING,
-sub_grade STRING,
--- =========================
--- INFORMATIONS EMPLOI / CLIENT
--- =========================
-emp_title STRING,
-emp_length STRING,
-home_ownership STRING,
-annual_inc STRING,
-verification_status STRING,
--- =========================
--- DATES & STATUT
--- =========================
-issue_d STRING,
-loan_status STRING,
-pymnt_plan STRING,
--- =========================
--- DESCRIPTIF
--- =========================
-url STRING,
-`desc` STRING,
-purpose STRING,
-title STRING,
--- =========================
--- LOCALISATION
--- =========================
-zip_code STRING,
-addr_state STRING,
--- =========================
--- RISQUE CLIENT
--- =========================
-dti STRING,
-delinq_2yrs STRING,
-earliest_cr_line STRING,
-inq_last_6mths STRING,
-mths_since_last_delinq STRING,
-mths_since_last_record STRING,
-open_acc STRING,
-pub_rec STRING,
-revol_bal STRING,
-revol_util STRING,
-total_acc STRING,
--- =========================
--- EXPOSITION / PAIEMENTS
--- =========================
-initial_list_status STRING,
-out_prncp STRING,
-out_prncp_inv STRING,
-total_pymnt STRING,
-total_pymnt_inv STRING,
-total_rec_prncp STRING,
-total_rec_int STRING,
-total_rec_late_fee STRING,
-recoveries STRING,
-collection_recovery_fee STRING,
--- =========================
--- DATES PAIEMENT
--- =========================
-last_pymnt_d STRING,
-last_pymnt_amnt STRING,
-next_pymnt_d STRING,
-last_credit_pull_d STRING,
--- =========================
--- REGLEMENTAIRE
--- =========================
-collections_12_mths_ex_med STRING,
-mths_since_last_major_derog STRING,
-policy_code STRING,
-application_type STRING,
-annual_inc_joint STRING,
-dti_joint STRING,
-verification_status_joint STRING,
-acc_now_delinq STRING,
-tot_coll_amt STRING,
-tot_cur_bal STRING,
--- =========================
--- OPEN CREDIT
--- =========================
-open_acc_6m STRING,
-open_act_il STRING,
-open_il_12m STRING,
-open_il_24m STRING,
-mths_since_rcnt_il STRING,
-total_bal_il STRING,
-il_util STRING,
-open_rv_12m STRING,
-open_rv_24m STRING,
-max_bal_bc STRING,
-all_util STRING,
-total_rev_hi_lim STRING,
-inq_fi STRING,
-total_cu_tl STRING,
-inq_last_12m STRING,
-acc_open_past_24mths STRING,
-avg_cur_bal STRING,
-bc_open_to_buy STRING,
-bc_util STRING,
-chargeoff_within_12_mths STRING,
-delinq_amnt STRING,
-mo_sin_old_il_acct STRING,
-mo_sin_old_rev_tl_op STRING,
-mo_sin_rcnt_rev_tl_op STRING,
-mo_sin_rcnt_tl STRING,
-mort_acc STRING,
-mths_since_recent_bc STRING,
-mths_since_recent_bc_dlq STRING,
-mths_since_recent_inq STRING,
-mths_since_recent_revol_delinq STRING,
--- =========================
--- CREDIT METRICS
--- =========================
-num_accts_ever_120_pd STRING,
-num_actv_bc_tl STRING,
-num_actv_rev_tl STRING,
-num_bc_sats STRING,
-num_bc_tl STRING,
-num_il_tl STRING,
-num_op_rev_tl STRING,
-num_rev_accts STRING,
-num_rev_tl_bal_gt_0 STRING,
-num_sats STRING,
-num_tl_120dpd_2m STRING,
-num_tl_30dpd STRING,
-num_tl_90g_dpd_24m STRING,
-num_tl_op_past_12m STRING,
-pct_tl_nvr_dlq STRING,
-percent_bc_gt_75 STRING,
-pub_rec_bankruptcies STRING,
-tax_liens STRING,
-tot_hi_cred_lim STRING,
-total_bal_ex_mort STRING,
-total_bc_limit STRING,
-total_il_high_credit_limit STRING,
--- =========================
--- JOINT APPLICATION
--- =========================
-revol_bal_joint STRING,
-sec_app_earliest_cr_line STRING,
-sec_app_inq_last_6mths STRING,
-sec_app_mort_acc STRING,
-sec_app_open_acc STRING,
-sec_app_revol_util STRING,
-sec_app_open_act_il STRING,
-sec_app_num_rev_accts STRING,
-sec_app_chargeoff_within_12_mths STRING,
-sec_app_collections_12_mths_ex_med STRING,
-sec_app_mths_since_last_major_derog STRING,
--- =========================
--- HARDSHIP
--- =========================
-hardship_flag STRING,
-hardship_type STRING,
-hardship_reason STRING,
-hardship_status STRING,
-deferral_term STRING,
-hardship_amount STRING,
-hardship_start_date STRING,
-hardship_end_date STRING,
-payment_plan_start_date STRING,
-hardship_length STRING,
-hardship_dpd STRING,
-hardship_loan_status STRING,
-orig_projected_additional_accrued_interest STRING,
-hardship_payoff_balance_amount STRING,
-hardship_last_payment_amount STRING,
--- =========================
--- SETTLEMENT
--- =========================
-disbursement_method STRING,
-debt_settlement_flag STRING,
-debt_settlement_flag_date STRING,
-settlement_status STRING,
-settlement_date STRING,
-settlement_amount STRING,
-settlement_percentage STRING,
-settlement_term STRING
+    -- ------------------------------------------------------------------------
+    -- 1.1 Identifiants
+    -- ------------------------------------------------------------------------
+    id STRING,
+    member_id STRING,
+
+    -- ------------------------------------------------------------------------
+    -- 1.2 Montants du prêt
+    -- ------------------------------------------------------------------------
+    loan_amnt STRING,
+    funded_amnt STRING,
+    funded_amnt_inv STRING,
+
+    -- ------------------------------------------------------------------------
+    -- 1.3 Caractéristiques et conditions du prêt
+    -- ------------------------------------------------------------------------
+    term STRING,
+    int_rate STRING,
+    installment STRING,
+    grade STRING,
+    sub_grade STRING,
+
+    -- ------------------------------------------------------------------------
+    -- 1.4 Profil socio-professionnel de l'emprunteur
+    -- ------------------------------------------------------------------------
+    emp_title STRING,
+    emp_length STRING,
+    home_ownership STRING,
+    annual_inc STRING,
+    verification_status STRING,
+
+    -- ------------------------------------------------------------------------
+    -- 1.5 Dates d'octroi et statut du prêt
+    -- ------------------------------------------------------------------------
+    issue_d STRING,
+    loan_status STRING,
+    pymnt_plan STRING,
+
+    -- ------------------------------------------------------------------------
+    -- 1.6 Informations descriptives
+    -- ------------------------------------------------------------------------
+    url STRING,
+    `desc` STRING,
+    purpose STRING,
+    title STRING,
+
+    -- ------------------------------------------------------------------------
+    -- 1.7 Localisation géographique
+    -- ------------------------------------------------------------------------
+    zip_code STRING,
+    addr_state STRING,
+
+    -- ------------------------------------------------------------------------
+    -- 1.8 Indicateurs de risque et historique de crédit
+    -- ------------------------------------------------------------------------
+    dti STRING,
+    delinq_2yrs STRING,
+    earliest_cr_line STRING,
+    inq_last_6mths STRING,
+    mths_since_last_delinq STRING,
+    mths_since_last_record STRING,
+    open_acc STRING,
+    pub_rec STRING,
+    revol_bal STRING,
+    revol_util STRING,
+    total_acc STRING,
+
+    -- ------------------------------------------------------------------------
+    -- 1.9 Exposition au défaut (EAD), remboursements et recouvrements
+    -- ------------------------------------------------------------------------
+    initial_list_status STRING,
+    out_prncp STRING,
+    out_prncp_inv STRING,
+    total_pymnt STRING,
+    total_pymnt_inv STRING,
+    total_rec_prncp STRING,
+    total_rec_int STRING,
+    total_rec_late_fee STRING,
+    recoveries STRING,
+    collection_recovery_fee STRING,
+
+    -- ------------------------------------------------------------------------
+    -- 1.10 Historique et échéances de paiement
+    -- ------------------------------------------------------------------------
+    last_pymnt_d STRING,
+    last_pymnt_amnt STRING,
+    next_pymnt_d STRING,
+    last_credit_pull_d STRING,
+
+    -- ------------------------------------------------------------------------
+    -- 1.11 Données réglementaires et encours globaux
+    -- ------------------------------------------------------------------------
+    collections_12_mths_ex_med STRING,
+    mths_since_last_major_derog STRING,
+    policy_code STRING,
+    application_type STRING,
+    annual_inc_joint STRING,
+    dti_joint STRING,
+    verification_status_joint STRING,
+    acc_now_delinq STRING,
+    tot_coll_amt STRING,
+    tot_cur_bal STRING,
+
+    -- ------------------------------------------------------------------------
+    -- 1.12 Activité récente et lignes de crédit ouvertes
+    -- ------------------------------------------------------------------------
+    open_acc_6m STRING,
+    open_act_il STRING,
+    open_il_12m STRING,
+    open_il_24m STRING,
+    mths_since_rcnt_il STRING,
+    total_bal_il STRING,
+    il_util STRING,
+    open_rv_12m STRING,
+    open_rv_24m STRING,
+    max_bal_bc STRING,
+    all_util STRING,
+    total_rev_hi_lim STRING,
+    inq_fi STRING,
+    total_cu_tl STRING,
+    inq_last_12m STRING,
+    acc_open_past_24mths STRING,
+    avg_cur_bal STRING,
+    bc_open_to_buy STRING,
+    bc_util STRING,
+    chargeoff_within_12_mths STRING,
+    delinq_amnt STRING,
+    mo_sin_old_il_acct STRING,
+    mo_sin_old_rev_tl_op STRING,
+    mo_sin_rcnt_rev_tl_op STRING,
+    mo_sin_rcnt_tl STRING,
+    mort_acc STRING,
+    mths_since_recent_bc STRING,
+    mths_since_recent_bc_dlq STRING,
+    mths_since_recent_inq STRING,
+    mths_since_recent_revol_delinq STRING,
+
+    -- ------------------------------------------------------------------------
+    -- 1.13 Métriques détaillées de comportement de crédit
+    -- ------------------------------------------------------------------------
+    num_accts_ever_120_pd STRING,
+    num_actv_bc_tl STRING,
+    num_actv_rev_tl STRING,
+    num_bc_sats STRING,
+    num_bc_tl STRING,
+    num_il_tl STRING,
+    num_op_rev_tl STRING,
+    num_rev_accts STRING,
+    num_rev_tl_bal_gt_0 STRING,
+    num_sats STRING,
+    num_tl_120dpd_2m STRING,
+    num_tl_30dpd STRING,
+    num_tl_90g_dpd_24m STRING,
+    num_tl_op_past_12m STRING,
+    pct_tl_nvr_dlq STRING,
+    percent_bc_gt_75 STRING,
+    pub_rec_bankruptcies STRING,
+    tax_liens STRING,
+    tot_hi_cred_lim STRING,
+    total_bal_ex_mort STRING,
+    total_bc_limit STRING,
+    total_il_high_credit_limit STRING,
+
+    -- ------------------------------------------------------------------------
+    -- 1.14 Informations des co-emprunteurs (Joint Application)
+    -- ------------------------------------------------------------------------
+    revol_bal_joint STRING,
+    sec_app_earliest_cr_line STRING,
+    sec_app_inq_last_6mths STRING,
+    sec_app_mort_acc STRING,
+    sec_app_open_acc STRING,
+    sec_app_revol_util STRING,
+    sec_app_open_act_il STRING,
+    sec_app_num_rev_accts STRING,
+    sec_app_chargeoff_within_12_mths STRING,
+    sec_app_collections_12_mths_ex_med STRING,
+    sec_app_mths_since_last_major_derog STRING,
+
+    -- ------------------------------------------------------------------------
+    -- 1.15 Plans d'allègement et difficultés financières (Hardship)
+    -- ------------------------------------------------------------------------
+    hardship_flag STRING,
+    hardship_type STRING,
+    hardship_reason STRING,
+    hardship_status STRING,
+    deferral_term STRING,
+    hardship_amount STRING,
+    hardship_start_date STRING,
+    hardship_end_date STRING,
+    payment_plan_start_date STRING,
+    hardship_length STRING,
+    hardship_dpd STRING,
+    hardship_loan_status STRING,
+    orig_projected_additional_accrued_interest STRING,
+    hardship_payoff_balance_amount STRING,
+    hardship_last_payment_amount STRING,
+
+    -- ------------------------------------------------------------------------
+    -- 1.16 Règlements amiables et restructurations de dette (Settlement)
+    -- ------------------------------------------------------------------------
+    disbursement_method STRING,
+    debt_settlement_flag STRING,
+    debt_settlement_flag_date STRING,
+    settlement_status STRING,
+    settlement_date STRING,
+    settlement_amount STRING,
+    settlement_percentage STRING,
+    settlement_term STRING
 )
 USING DELTA;
 
 
--- Investigate table IFRS_9_credit_risk.Loan
-select * from IFRS_9_credit_risk.Loan;
+-- ============================================================================
+-- 2. CONTRÔLE INITIAL ET APERÇU DU FICHIER SOURCE CSV
+-- ============================================================================
 
+-- Vérification de la structure de la table cible
+SELECT * FROM IFRS_9_credit_risk.Loan;
 
--- Get the first data from csv file
+-- Prévisualisation des 5 premières lignes du fichier CSV sur le volume Databricks
 SELECT * 
 FROM read_files(
   '/Volumes/workspace/default/loan_volume/Loan_reduced.csv',
@@ -211,8 +239,10 @@ FROM read_files(
 )
 LIMIT 5;
 
--- Copy csv file to the table loan
 
+-- ============================================================================
+-- 3. INGESTION DES DONNÉES CSV DANS LA TABLE DELTA (COPY INTO)
+-- ============================================================================
 COPY INTO IFRS_9_credit_risk.Loan
 FROM '/Volumes/workspace/default/loan_volume/Loan_reduced.csv'
 FILEFORMAT = CSV
@@ -225,24 +255,27 @@ FORMAT_OPTIONS (
   'nullValue' = 'NULL'
 );
 
--- Put the real variables types 
 
+-- ============================================================================
+-- 4. TYPAGE DES VARIABLES ET CRÉATION DE LA TABLE STANDARDISÉE (LOAN_V0)
+-- ============================================================================
 CREATE OR REPLACE TABLE IFRS_9_credit_risk.loan_v0 AS
 SELECT
--- =========================
--- IDENTIFIANTS
--- =========================
-CAST(id AS BIGINT) AS id,
-CAST(member_id AS BIGINT) AS member_id,
--- =========================
--- MONTANTS
--- =========================
+    -- ------------------------------------------------------------------------
+    -- 4.1 Identifiants
+    -- ------------------------------------------------------------------------
+    CAST(id AS BIGINT) AS id,
+    CAST(member_id AS BIGINT) AS member_id,
+
+    -- ------------------------------------------------------------------------
+    -- 4.2 Montants du prêt (conversion décimale)
+-- ------------------------------------------------------------------------
 CAST(REPLACE(loan_amnt, ',', '.') AS DOUBLE) AS loan_amnt,
 CAST(REPLACE(funded_amnt, ',', '.') AS DOUBLE) AS funded_amnt,
 CAST(REPLACE(funded_amnt_inv, ',', '.') AS DOUBLE) AS funded_amnt_inv,
--- =========================
--- INFORMATIONS PRET
--- =========================
+-- ------------------------------------------------------------------------
+-- 4.3 Caractéristiques du prêt et profil client
+-- ------------------------------------------------------------------------
 TRIM(term) AS term,
 CAST(REPLACE(int_rate, ',', '.') AS DOUBLE) AS int_rate,
 CAST(REPLACE(installment, ',', '.') AS DOUBLE) AS installment,
@@ -257,11 +290,14 @@ issue_d,
 loan_status,
 pymnt_plan,
 url,
-`desc`,
+desc,
 purpose,
 title,
 zip_code,
 addr_state,
+-- ------------------------------------------------------------------------
+-- 4.4 Indicateurs de risque et encours
+-- ------------------------------------------------------------------------
 CAST(REPLACE(dti, ',', '.') AS DOUBLE) AS dti,
 CAST(delinq_2yrs AS INT) AS delinq_2yrs,
 earliest_cr_line,
@@ -283,10 +319,16 @@ CAST(REPLACE(total_rec_int, ',', '.') AS DOUBLE) AS total_rec_int,
 CAST(REPLACE(total_rec_late_fee, ',', '.') AS DOUBLE) AS total_rec_late_fee,
 CAST(REPLACE(recoveries, ',', '.') AS DOUBLE) AS recoveries,
 CAST(REPLACE(collection_recovery_fee, ',', '.') AS DOUBLE) AS collection_recovery_fee,
+-- ------------------------------------------------------------------------
+-- 4.5 Dates et montants des derniers règlements
+-- ------------------------------------------------------------------------
 last_pymnt_d,
 CAST(REPLACE(last_pymnt_amnt, ',', '.') AS DOUBLE) AS last_pymnt_amnt,
 next_pymnt_d,
 last_credit_pull_d,
+-- ------------------------------------------------------------------------
+-- 4.6 Données réglementaires et demandes conjointes
+-- ------------------------------------------------------------------------
 CAST(collections_12_mths_ex_med AS INT) AS collections_12_mths_ex_med,
 CAST(mths_since_last_major_derog AS INT) AS mths_since_last_major_derog,
 CAST(policy_code AS INT) AS policy_code,
@@ -297,6 +339,9 @@ verification_status_joint,
 CAST(acc_now_delinq AS INT) AS acc_now_delinq,
 CAST(tot_coll_amt AS BIGINT) AS tot_coll_amt,
 CAST(tot_cur_bal AS BIGINT) AS tot_cur_bal,
+-- ------------------------------------------------------------------------
+-- 4.7 Lignes de crédit ouvertes et utilisation
+-- ------------------------------------------------------------------------
 CAST(open_acc_6m AS INT) AS open_acc_6m,
 CAST(open_act_il AS INT) AS open_act_il,
 CAST(open_il_12m AS INT) AS open_il_12m,
@@ -327,6 +372,9 @@ CAST(mths_since_recent_bc AS INT) AS mths_since_recent_bc,
 CAST(mths_since_recent_bc_dlq AS INT) AS mths_since_recent_bc_dlq,
 CAST(mths_since_recent_inq AS INT) AS mths_since_recent_inq,
 CAST(mths_since_recent_revol_delinq AS INT) AS mths_since_recent_revol_delinq,
+-- ------------------------------------------------------------------------
+-- 4.8 Métriques historiques des comptes et défauts
+-- ------------------------------------------------------------------------
 CAST(num_accts_ever_120_pd AS INT) AS num_accts_ever_120_pd,
 CAST(num_actv_bc_tl AS INT) AS num_actv_bc_tl,
 CAST(num_actv_rev_tl AS INT) AS num_actv_rev_tl,
@@ -349,6 +397,9 @@ CAST(tot_hi_cred_lim AS BIGINT) AS tot_hi_cred_lim,
 CAST(total_bal_ex_mort AS BIGINT) AS total_bal_ex_mort,
 CAST(total_bc_limit AS BIGINT) AS total_bc_limit,
 CAST(total_il_high_credit_limit AS BIGINT) AS total_il_high_credit_limit,
+-- ------------------------------------------------------------------------
+-- 4.9 Attributs du co-emprunteur (Secondary Applicant)
+-- ------------------------------------------------------------------------
 CAST(revol_bal_joint AS BIGINT) AS revol_bal_joint,
 sec_app_earliest_cr_line,
 CAST(sec_app_inq_last_6mths AS INT) AS sec_app_inq_last_6mths,
@@ -360,6 +411,9 @@ CAST(sec_app_num_rev_accts AS INT) AS sec_app_num_rev_accts,
 CAST(sec_app_chargeoff_within_12_mths AS INT) AS sec_app_chargeoff_within_12_mths,
 CAST(sec_app_collections_12_mths_ex_med AS INT) AS sec_app_collections_12_mths_ex_med,
 CAST(sec_app_mths_since_last_major_derog AS INT) AS sec_app_mths_since_last_major_derog,
+-- ------------------------------------------------------------------------
+-- 4.10 Plans d'allègement (Hardship) et restructurations (Settlement)
+-- ------------------------------------------------------------------------
 hardship_flag,
 hardship_type,
 hardship_reason,
@@ -384,10 +438,8 @@ CAST(REPLACE(settlement_amount, ',', '.') AS DOUBLE) AS settlement_amount,
 CAST(REPLACE(settlement_percentage, ',', '.') AS DOUBLE) AS settlement_percentage,
 CAST(settlement_term AS INT) AS settlement_term
 FROM IFRS_9_credit_risk.Loan;
-
--- Create a copy storage loan_vs 'storage version'
-CREATE TABLE IFRS_9_credit_risk.loan_vs AS SELECT * FROM IFRS_9_credit_risk.loan_v0;
-
-
-
-
+-- ============================================================================
+-- 5. SAUVEGARDE D'UNE VERSION DE STOCKAGE DE RÉFÉRENCE (LOAN_VS)
+-- ============================================================================
+CREATE TABLE IFRS_9_credit_risk.loan_vs AS
+SELECT * FROM IFRS_9_credit_risk.loan_v0;
