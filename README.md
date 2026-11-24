@@ -121,7 +121,7 @@ BI-Analytics-Risque-Credit-IFRS9-Forward-Looking/
 
 **Projet :** Pilotage du Risque de Crédit IFRS 9 (Forward-Looking)  
 **Outils :** SQL Server, Databricks (PySpark / Delta Lake), Python (FRED API), Microsoft Power BI Desktop  
-**Périmètre des données :** Portefeuille Lending Club (2018) & Séries Macroéconomiques FRED
+**Périmètre des données :** Portefeuille Lending Club (2018) & Séries Macroéconomiques FRED  
 **Projet :** Pilotage du Risque de Crédit IFRS 9 (Forward-Looking)  
 **Outils :** SQL Server, Databricks (PySpark / Delta Lake), Python (FRED API), Microsoft Power BI Desktop  
 **Périmètre des données :** Portefeuille Lending Club (2018) & Séries Macroéconomiques FRED
