@@ -21,7 +21,7 @@ Le rapport Power BI est organisé en **5 vues analytiques** interactives :
       <br/><b>1. Aperçu niveau direction</b>
     </td>
     <td align="center">
-      <img src="Dashboard-Preview/2 - Analyse du risque de credit.jpg" width="100%" alt="Analyse du risque de crédit"/>
+      <img src="Dashboard-Preview/2 - Analyse du risque de crédit.jpg" width="100%" alt="Analyse du risque de crédit"/>
       <br/><b>2. Analyse du risque de crédit</b>
     </td>
   </tr>
@@ -31,13 +31,13 @@ Le rapport Power BI est organisé en **5 vues analytiques** interactives :
       <br/><b>3. Performance des modèles ECL IFRS 9</b>
     </td>
     <td align="center">
-      <img src="Dashboard-Preview/4 - Perspectives et impact macroeconomique.jpg" width="100%" alt="Perspectives & impact macroéconomique"/>
+      <img src="Dashboard-Preview/4 - Perspectives & impact macroéconomique.jpg" width="100%" alt="Perspectives & impact macroéconomique"/>
       <br/><b>4. Perspectives & impact macroéconomique</b>
     </td>
   </tr>
   <tr>
     <td align="center" colspan="2">
-      <img src="Dashboard-Preview/5 - Tests de resistance du modele.jpg" width="50%" alt="Tests de résistance du modèle"/>
+      <img src="Dashboard-Preview/5 - Tests de resistance du modèle.jpg" width="50%" alt="Tests de résistance du modèle"/>
       <br/><b>5. Tests de résistance du modèle (Stress Testing)</b>
     </td>
   </tr>
