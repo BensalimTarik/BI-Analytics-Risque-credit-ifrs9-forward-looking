@@ -17,7 +17,7 @@ Le rapport Power BI est organisé en **5 vues analytiques** interactives :
 <table>
   <tr>
     <td align="center">
-      <img src="Dashboard-Preview/1 - Apercu niveau direction.jpg" width="100%" alt="Aperçu niveau direction"/>
+      <img src="Dashboard-Preview/1 - Aperçu niveau direction.jpg" width="100%" alt="Aperçu niveau direction"/>
       <br/><b>1. Aperçu niveau direction</b>
     </td>
     <td align="center">
