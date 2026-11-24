@@ -97,11 +97,18 @@ BI-Analytics-Risque-Credit-IFRS9-Forward-Looking/
 │   ├── 4 - Perspectives et impact macroeconomique.jpg
 │   └── 5 - Tests de resistance du modele.jpg
 │
-├── Data-Engineering-Databricks/
-│   ├── 01_extract_sqlserver.sh
-│   ├── 02_cleaning_and_star_schema.sql
-│   ├── 03_data_preparation_pyspark.py
-│   └── 04_macro_fred_ingestion.py
+├── SQL/
+│   ├── 01_data_import.sql
+│   ├── 02_data_cleaning.sql
+│   ├── 03_star_schema_creation.sql
+│   ├── 04_import_macro_data.sql
+│   └── 05_pd_model_retail_macro.sql
+│
+├── Notebooks-Python/
+│   ├── 01_cleaning_loan_dataset.ipynb
+│   ├── 02_data_preparation_cleaning.ipynb
+│   ├── 03_macro_data_fred_ifrs9.ipynb
+│   └── 04_ifrs9_model_retail_logistic_regression.py
 │
 └── README.md
 ```
