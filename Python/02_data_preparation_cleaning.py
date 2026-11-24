@@ -1,11 +1,28 @@
 # Databricks notebook source
-# Get table from SQL
+# ============================================================================
+# PROJET      : BI Analytics – Risque de Crédit IFRS 9 (Forward-Looking)
+# SCRIPT      : 02_data_preparation_cleaning.py
+# DESCRIPTION : Chargement de la table standardisée (loan_v0), sélection des 
+#               variables clés du projet, génération d'un identifiant technique 
+#               incrémental unique (id) et sauvegarde dans Delta Lake (loan_v1_py).
+# ============================================================================
+
+
+# ============================================================================
+# 1. CHARGEMENT DE LA TABLE SOURCE STANDARDISÉE (LOAN_V0)
+# ============================================================================
 df = spark.table("IFRS_9_credit_risk.loan_v0")
 
-# Important columns to keep
+
+# ============================================================================
+# 2. SÉLECTION DES VARIABLES MÉTIER ET DE RISQUE RETENUES
+# ============================================================================
 columns_to_keep = [
+    # --- 2.1 Identifiants ---
     "id",
     "member_id",
+
+    # --- 2.2 Montants et conditions du prêt ---
     "loan_amnt",
     "funded_amnt",
     "funded_amnt_inv",
@@ -14,17 +31,25 @@ columns_to_keep = [
     "installment",
     "grade",
     "sub_grade",
+
+    # --- 2.3 Profil socio-professionnel de l'emprunteur ---
     "emp_title",
     "emp_length",
     "home_ownership",
     "annual_inc",
     "verification_status",
+
+    # --- 2.4 Dates, statut et objet du prêt ---
     "issue_d",
     "loan_status",
     "purpose",
     "title",
+
+    # --- 2.5 Localisation géographique ---
     "zip_code",
     "addr_state",
+
+    # --- 2.6 Indicateurs d'endettement et historique de crédit ---
     "dti",
     "delinq_2yrs",
     "earliest_cr_line",
@@ -34,6 +59,8 @@ columns_to_keep = [
     "revol_bal",
     "revol_util",
     "total_acc",
+
+    # --- 2.7 Exposition au défaut (EAD), remboursements et recouvrements ---
     "out_prncp",
     "out_prncp_inv",
     "total_pymnt",
@@ -43,10 +70,14 @@ columns_to_keep = [
     "total_rec_late_fee",
     "recoveries",
     "collection_recovery_fee",
+
+    # --- 2.8 Dates de paiement et consultation crédit ---
     "last_pymnt_d",
     "last_pymnt_amnt",
     "next_pymnt_d",
     "last_credit_pull_d",
+
+    # --- 2.9 Encours globaux, structure des comptes et qualité du portefeuille ---
     "application_type",
     "acc_now_delinq",
     "tot_cur_bal",
@@ -68,41 +99,46 @@ columns_to_keep = [
     "total_bal_ex_mort",
     "total_bc_limit",
     "total_il_high_credit_limit",
+
+    # --- 2.10 Indicateurs de restructuration et difficultés financières ---
     "hardship_flag",
     "debt_settlement_flag"
 ]
 
+# Filtrage des colonnes et écriture intermédiaire dans Delta Lake
 df_clean = df.select(columns_to_keep)
 
 df_clean.write.mode("overwrite").saveAsTable(
     "IFRS_9_credit_risk.loan_v1_py"
 )
 
-# Add incremental id
 
+# ============================================================================
+# 3. GÉNÉRATION D'UN IDENTIFIANT TECHNIQUE INCRÉMENTAL UNIQUE (ID)
+# ============================================================================
 from pyspark.sql import functions as F
 from pyspark.sql.window import Window
 
-# Load table
+# 3.1 Chargement de la table intermédiaire et suppression de l'ancien ID
 df = spark.table("IFRS_9_credit_risk.loan_v1_py")
-
-# Drop old id column
 df = df.drop("id")
 
-# Window spec
+# 3.2 Définition de la fenêtre de partitionnement et création de l'index séquentiel
 window_spec = Window.orderBy(F.monotonically_increasing_id())
 
-# Add new incremental id
 df = df.withColumn(
     "id",
     F.row_number().over(window_spec)
 )
 
-# Put id first
+# 3.3 Réorganisation des colonnes pour positionner 'id' en première position
 cols = ["id"] + [c for c in df.columns if c != "id"]
 df = df.select(cols)
 
-# Save with schema overwrite
+
+# ============================================================================
+# 4. SAUVEGARDE FINALE DANS DELTA LAKE ET CONTRÔLE VISUEL
+# ============================================================================
 (
     df.write
     .mode("overwrite")
@@ -111,5 +147,6 @@ df = df.select(cols)
     .saveAsTable("IFRS_9_credit_risk.loan_v1_py")
 )
 
+# Affichage des 100 premières lignes pour validation
 df = spark.table("IFRS_9_credit_risk.loan_v1_py")
 df.show(100)
