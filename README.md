@@ -97,6 +97,10 @@ BI-Analytics-Risque-Credit-IFRS9-Forward-Looking/
 │   ├── 4 - Perspectives et impact macroeconomique.jpg
 │   └── 5 - Tests de resistance du modele.jpg
 │
+│── Specifications-Overview/
+│   ├── 1 - Spec-FR.md
+│   ├── 2 - Spec-En.md
+│
 ├── SQL/
 │   ├── 01_data_import.sql
 │   ├── 02_data_cleaning.sql
